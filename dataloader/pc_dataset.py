@@ -90,6 +90,7 @@ class SemKITTI_sk(data.Dataset):
                     self.im_idx.append(os.path.join(data_path, str(i_folder).zfill(2), 'velodyne',str(j).zfill(6)+'.bin'))
         
         self.file_client_args=dict(backend='petrel', path_mapping=dict({'data/':'s3://semikitti/'}))
+        self.file_client = None
 
     def __len__(self):
         'Denotes the total number of samples'
