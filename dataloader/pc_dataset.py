@@ -7,6 +7,7 @@ import numpy as np
 from torch.utils import data
 import yaml
 import pickle
+import mmcv 
 
 REGISTERED_PC_DATASET_CLASSES = {}
 
@@ -79,15 +80,45 @@ class SemKITTI_sk(data.Dataset):
             raise Exception('Split must be train/val/test')
 
         self.im_idx = []
-        for i_folder in split:
-            self.im_idx += absoluteFilePaths('/'.join([data_path, str(i_folder).zfill(2), 'velodyne']))
+        self.load_from_dir = True
+        if self.load_from_dir is True:
+            for i_folder in split:
+                self.im_idx += myabsoluteFilePaths('/'.join([data_path,str(i_folder).zfill(2),'velodyne']))
+        else:
+            for i_folder in split:
+                for j in range(0,semkittiyaml['total_num'][i_folder]):
+                    self.im_idx.append(os.path.join(data_path, str(i_folder).zfill(2), 'velodyne',str(j).zfill(6)+'.bin'))
+        
+        self.file_client_args=dict(backend='petrel', path_mapping=dict({'data/':'s3://semikitti/'}))
 
     def __len__(self):
         'Denotes the total number of samples'
         return len(self.im_idx)
 
     def __getitem__(self, index):
-        raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
+        # raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
+        if self.load_from_dir is False:
+            if self.file_client is None:
+                self.file_client = mmcv.FileClient(**self.file_client_args)
+            try:
+                mask_bytes = self.file_client.get(self.im_idx[index])
+                #add .copy() to fix read-only bug
+                raw_data = np.frombuffer(
+                    mask_bytes, dtype=np.float32).copy().reshape((-1, 4))######之前ceph无法读取的问题所在
+                # pts_semantic_mask = np.frombuffer(
+                #     mask_bytes, dtype=np.uint32).copy()
+                # pts_semantic_mask = np.frombuffer(
+                #     mask_bytes, dtype=np.long).copy()
+                #pts_semantic_mask = np.fromfile(
+                #    pts_semantic_mask_path, dtype=np.uint32)
+            except ConnectionError:
+                mmcv.check_file_exist(self.im_idx[index])
+                raw_data = np.fromfile(
+                    self.im_idx[index], dtype=np.float32).reshape((-1, 4))
+        else:
+            raw_data = np.fromfile(
+                self.im_idx[index], dtype=np.float32).reshape((-1, 4))
+
         if self.imageset == 'test':
             annotated_data = np.expand_dims(np.zeros_like(raw_data[:, 0], dtype=int), axis=1)
         else:
@@ -365,3 +396,10 @@ def get_nuScenes_label_name(label_mapping):
         nuScenes_label_name[val_] = nuScenesyaml['labels_16'][val_]
 
     return nuScenes_label_name
+
+def myabsoluteFilePaths(directory):
+    for dirpath, _, filenames in os.walk(directory):
+        filenames.sort()
+        for f in filenames:
+            yield os.path.join(dirpath, f)
+
