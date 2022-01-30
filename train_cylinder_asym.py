@@ -13,6 +13,7 @@ import torch.optim as optim
 from tqdm import tqdm
 
 from utils.metric_util import per_class_iu, fast_hist_crop
+from utils import common_utils
 from dataloader.pc_dataset import get_SemKITTI_label_name
 from builder import data_builder, model_builder, loss_builder
 from config.config import load_config_data
