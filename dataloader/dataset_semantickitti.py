@@ -96,10 +96,10 @@ class voxel_dataset(data.Dataset):
         grid_ind = (np.floor((np.clip(xyz, min_bound, max_bound) - min_bound) / intervals)).astype(np.int)
 
         # process voxel position
-        voxel_position = np.zeros(self.grid_size, dtype=np.float32)
-        dim_array = np.ones(len(self.grid_size) + 1, int)
-        dim_array[0] = -1
-        voxel_position = np.indices(self.grid_size) * intervals.reshape(dim_array) + min_bound.reshape(dim_array)
+        # voxel_position = np.zeros(self.grid_size, dtype=np.float32)
+        # dim_array = np.ones(len(self.grid_size) + 1, int)
+        # dim_array[0] = -1
+        # voxel_position = np.indices(self.grid_size) * intervals.reshape(dim_array) + min_bound.reshape(dim_array)
 
         # process labels
         processed_label = np.ones(self.grid_size, dtype=np.uint8) * self.ignore_label
@@ -107,7 +107,8 @@ class voxel_dataset(data.Dataset):
         label_voxel_pair = label_voxel_pair[np.lexsort((grid_ind[:, 0], grid_ind[:, 1], grid_ind[:, 2])), :]
         processed_label = nb_process_label(np.copy(processed_label), label_voxel_pair)
 
-        data_tuple = (voxel_position, processed_label)
+        #data_tuple = (voxel_position, processed_label)
+        data_tuple = (None, processed_label)
 
         # center data on each voxel for PTnet
         voxel_centers = (grid_ind.astype(np.float32) + 0.5) * intervals + min_bound
