@@ -3,7 +3,10 @@
 # @file: segmentator_3d_asymm_spconv.py
 
 import numpy as np
-import spconv
+try:
+    import spconv.pytorch as spconv
+except ImportError:
+    import spconv
 import torch
 from torch import nn
 
