@@ -128,7 +128,7 @@ def main(args):
                                                                   val_dataloader_config,
                                                                   grid_size=grid_size)
 
-    output_dir = os.path.join('/mnt/lustrenew/xiaozeqi.vendor/output')
+    output_dir = os.path.join('/mnt/lustre/xiaozeqi.vendor/output')
     ckpt_dir = os.path.join(output_dir, 'ckpt')
     tmp_dir = os.path.join(output_dir, 'tmp')
     summary_dir = os.path.join(output_dir, 'summary')
