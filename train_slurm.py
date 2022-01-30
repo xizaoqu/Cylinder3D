@@ -116,7 +116,7 @@ def main(args):
 
     my_model.to(pytorch_device)
     #my_model = torch.nn.DataParallel(my_model)
-    my_model = torch.nn.parallel.DistributedDataParallel(my_model, device_ids=[args.local_rank],output_device=args.local_rank)
+    my_model = torch.nn.parallel.DistributedDataParallel(my_model, device_ids=[local_rank],output_device=local_rank)
 
     optimizer = optim.Adam(my_model.parameters(), lr=train_hypers["learning_rate"])
 
