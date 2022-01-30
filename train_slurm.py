@@ -128,7 +128,7 @@ def main(args):
                                                                   val_dataloader_config,
                                                                   grid_size=grid_size)
 
-    output_dir = os.path.join('/mnt/lustre/xiaozeqi.vendor/output'+args.outdir)
+    output_dir = os.path.join('/mnt/lustre/xiaozeqi.vendor/output/'+args.outdir)
     ckpt_dir = os.path.join(output_dir, 'ckpt')
     tmp_dir = os.path.join(output_dir, 'tmp')
     summary_dir = os.path.join(output_dir, 'summary')
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-y', '--config_path', default='config/semantickitti.yaml')
     parser.add_argument('--local_rank', type=int, default=-1, help='node rank for distributed training')
-    parser.add_argument('--outdir', type=int, default='Cylinder', help='node rank for distributed training')
+    parser.add_argument('--outdir', default='Cylinder', help='node rank for distributed training')
 
     args = parser.parse_args()
 
