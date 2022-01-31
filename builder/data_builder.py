@@ -26,6 +26,8 @@ def build(dataset_config,
         from nuscenes import NuScenes
         nusc = NuScenes(version='v1.0-trainval', dataroot=data_path, verbose=True)
 
+    print("start")
+
     train_pt_dataset = SemKITTI(data_path, imageset=train_imageset,
                                 return_ref=train_ref, label_mapping=label_mapping, nusc=nusc)
     val_pt_dataset = SemKITTI(data_path, imageset=val_imageset,
@@ -53,15 +55,41 @@ def build(dataset_config,
         ignore_label=dataset_config["ignore_label"],
     )
 
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
+
+    # train_dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
+    #                                                   batch_size=train_dataloader_config["batch_size"],
+    #                                                   collate_fn=collate_fn_BEV,
+    #                                                   shuffle=train_dataloader_config["shuffle"],
+    #                                                   num_workers=train_dataloader_config["num_workers"])
+
+    # val_dataset_loader = torch.utils.data.DataLoader(dataset=val_dataset,
+    #                                                  batch_size=val_dataloader_config["batch_size"],
+    #                                                  collate_fn=collate_fn_BEV,
+    #                                                  shuffle=val_dataloader_config["shuffle"],
+    #                                                  num_workers=val_dataloader_config["num_workers"])
+    
     train_dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                                       batch_size=train_dataloader_config["batch_size"],
-                                                       collate_fn=collate_fn_BEV,
-                                                       shuffle=train_dataloader_config["shuffle"],
-                                                       num_workers=train_dataloader_config["num_workers"])
+                                                      batch_size=train_dataloader_config["batch_size"],
+                                                      collate_fn=collate_fn_BEV,
+                                                      #shuffle=train_dataloader_config["shuffle"],
+                                                      num_workers=train_dataloader_config["num_workers"],
+                                                      sampler=train_sampler,
+                                                      pin_memory = True,
+                                                      drop_last = False,
+                                                      timeout=0 
+                                                      )
+
     val_dataset_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                                      batch_size=val_dataloader_config["batch_size"],
                                                      collate_fn=collate_fn_BEV,
                                                      shuffle=val_dataloader_config["shuffle"],
-                                                     num_workers=val_dataloader_config["num_workers"])
+                                                     num_workers=val_dataloader_config["num_workers"],
+                                                     sampler=val_sampler,
+                                                     pin_memory = True,
+                                                     drop_last = False,
+                                                     timeout=0
+                                                     )
 
-    return train_dataset_loader, val_dataset_loader
+    return  train_dataset_loader, val_dataset_loader
