@@ -80,7 +80,7 @@ class SemKITTI_sk(data.Dataset):
             raise Exception('Split must be train/val/test')
 
         self.im_idx = []
-        self.load_from_dir = False
+        self.load_from_dir = True
         if self.load_from_dir is True:
             for i_folder in split:
                 self.im_idx += myabsoluteFilePaths('/'.join([data_path,str(i_folder).zfill(2),'velodyne']))
