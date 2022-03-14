@@ -87,11 +87,12 @@ class ResContextBlock(nn.Module):
 
             resA = self.conv2(x)
             resA = resA.replace_feature(self.act2(resA.features))
-            reaA = resA.replace_feature(self.bn1(resA.features))
+            resA = resA.replace_feature(self.bn1(resA.features))
 
             resA = self.conv3(resA)
             resA = resA.replace_feature(self.act3(resA.features))
             resA = resA.replace_feature(self.bn2(resA.features))
+
             resA = resA.replace_feature(resA.features + shortcut.features)
 
         else:
@@ -156,37 +157,21 @@ class ResBlock(nn.Module):
     def forward(self, x):
         if is_new_conv:
             shortcut = self.conv1(x)
-            shortcut.features = self.act1(shortcut.features)
             shortcut = shortcut.replace_feature(self.act1(shortcut.features))
-            shortcut.features = self.bn0(shortcut.features)
             shortcut = shortcut.replace_feature(self.bn0(shortcut.features))
 
-
             shortcut = self.conv1_2(shortcut)
-            shortcut = self.conv1_2(shortcut)
-            shortcut.features = self.act1_2(shortcut.features)
             shortcut = shortcut.replace_feature(self.act1_2(shortcut.features))
-            shortcut.features = self.bn0_2(shortcut.features)
             shortcut = shortcut.replace_feature(self.bn0_2(shortcut.features))
 
-
             resA = self.conv2(x)
-            resA = self.conv2(x)
-            resA.features = self.act2(resA.features)
             resA = resA.replace_feature(self.act2(resA.features))
-            resA.features = self.bn1(resA.features)
             resA = resA.replace_feature(self.bn1(resA.features))
 
-
             resA = self.conv3(resA)
-            resA = self.conv3(resA)
-            resA.features = self.act3(resA.features)
             resA = resA.replace_feature(self.act3(resA.features))
-            resA.features = self.bn2(resA.features)
             resA = resA.replace_feature(self.bn2(resA.features))
 
-
-            resA.features = resA.features + shortcut.features
             resA = resA.replace_feature(resA.features + shortcut.features)
 
         else:
