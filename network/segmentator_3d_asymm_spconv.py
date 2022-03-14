@@ -53,7 +53,7 @@ class ResContextBlock(nn.Module):
         self.bn0 = nn.BatchNorm1d(out_filters)
         self.act1 = nn.LeakyReLU()
 
-        self.conv1_2 = conv3x1(out_filters, out_filters, indice_key=indice_key + "bef")
+        self.conv1_2 = conv1x3(out_filters, out_filters, indice_key=indice_key + "bef")
         self.bn0_2 = nn.BatchNorm1d(out_filters)
         self.act1_2 = nn.LeakyReLU()
 
@@ -61,7 +61,7 @@ class ResContextBlock(nn.Module):
         self.act2 = nn.LeakyReLU()
         self.bn1 = nn.BatchNorm1d(out_filters)
 
-        self.conv3 = conv1x3(out_filters, out_filters, indice_key=indice_key + "bef")
+        self.conv3 = conv3x1(out_filters, out_filters, indice_key=indice_key + "bef")
         self.act3 = nn.LeakyReLU()
         self.bn2 = nn.BatchNorm1d(out_filters)
 

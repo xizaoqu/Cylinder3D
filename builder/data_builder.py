@@ -78,7 +78,6 @@ def build(dataset_config,
                                                       sampler=train_sampler,
                                                       pin_memory = True,
                                                       drop_last = False,
-                                                      timeout=0 
                                                       )
 
     val_dataset_loader = torch.utils.data.DataLoader(dataset=val_dataset,
@@ -89,7 +88,6 @@ def build(dataset_config,
                                                      sampler=val_sampler,
                                                      pin_memory = True,
                                                      drop_last = False,
-                                                     timeout=0
                                                      )
 
     return  train_dataset_loader, val_dataset_loader
