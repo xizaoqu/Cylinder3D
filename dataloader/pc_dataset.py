@@ -7,7 +7,7 @@ import numpy as np
 from torch.utils import data
 import yaml
 import pickle
-import mmcv 
+#import mmcv 
 
 REGISTERED_PC_DATASET_CLASSES = {}
 
@@ -100,7 +100,8 @@ class SemKITTI_sk(data.Dataset):
         # raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
         if self.load_from_dir is False:
             if self.file_client is None:
-                self.file_client = mmcv.FileClient(**self.file_client_args)
+                #self.file_client = mmcv.FileClient(**self.file_client_args)
+                raise NotImplementedError
             try:
                 mask_bytes = self.file_client.get(self.im_idx[index])
                 #add .copy() to fix read-only bug
@@ -113,6 +114,7 @@ class SemKITTI_sk(data.Dataset):
                 #pts_semantic_mask = np.fromfile(
                 #    pts_semantic_mask_path, dtype=np.uint32)
             except ConnectionError:
+                raise NotImplementedError
                 mmcv.check_file_exist(self.im_idx[index])
                 raw_data = np.fromfile(
                     self.im_idx[index], dtype=np.float32).reshape((-1, 4))
