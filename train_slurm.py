@@ -158,14 +158,12 @@ def main(args):
 
     while epoch < train_hypers['max_num_epochs']:
         loss_list = []
-        if local_rank == 0:
-            pbar = tqdm(total=len(train_dataset_loader), dynamic_ncols=True)
         #pbar = tqdm(total=len(train_dataset_loader))
-        time.sleep(10)
         # lr_scheduler.step(epoch)
 
         if local_rank == 0:
             if epoch >= 0:
+                pbar = tqdm(total=len(val_dataset_loader), dynamic_ncols=True)
                 my_model.eval()
                 hist_list = []
                 val_loss_list = []
@@ -190,6 +188,8 @@ def main(args):
                                                                 val_grid[count][:, 2]], val_pt_labs[count],
                                                             unique_label))
                         val_loss_list.append(loss.detach().cpu().numpy())
+                        pbar.update(1)
+                pbar.close()
                 my_model.train()
                 iou = per_class_iu(sum(hist_list))
                 # print('Validation per class iou: ')
@@ -216,6 +216,8 @@ def main(args):
                 logger.info('Current val loss is %.3f' %
                         (np.mean(val_loss_list)))
 
+        if local_rank == 0:
+            pbar = tqdm(total=len(train_dataset_loader), dynamic_ncols=True)
         for i_iter, (_, train_vox_label, train_grid, _, train_pt_fea) in enumerate(train_dataset_loader):
             #vox_cor(in cat), vox_label, grid(in polar), label(raw), decorate feature
             #在数据集中已经part和decorate好了
