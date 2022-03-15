@@ -14,10 +14,11 @@ def load_checkpoint(model_load_path, model):
     nomatch_size = 0
     for k in pre_weight.keys():
         value = pre_weight[k]
-        if k in my_model_dict and my_model_dict[k].shape == value.shape:
+        kk = k [7:]
+        if kk in my_model_dict and my_model_dict[kk].shape == value.shape:
             # print("loading ", k)
             match_size += 1
-            part_load[k] = value
+            part_load[kk] = value
         else:
             nomatch_size += 1
 
