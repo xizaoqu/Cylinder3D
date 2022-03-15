@@ -56,7 +56,7 @@ def build(dataset_config,
     )
 
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
+    #val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
 
     # train_dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,
     #                                                   batch_size=train_dataloader_config["batch_size"],
@@ -85,7 +85,7 @@ def build(dataset_config,
                                                      collate_fn=collate_fn_BEV,
                                                      shuffle=val_dataloader_config["shuffle"],
                                                      num_workers=val_dataloader_config["num_workers"],
-                                                     sampler=val_sampler,
+                                                     #sampler=val_sampler,
                                                      pin_memory = True,
                                                      drop_last = False,
                                                      )
