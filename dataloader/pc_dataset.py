@@ -162,11 +162,11 @@ class SemKITTI_nusc(data.Dataset):
         return len(self.nusc_infos)
 
     def __getitem__(self, index):
-        info = self.nusc_infos[index]
+        info = self.nusc_infos[index] # 根据token获得id再获得filename
         lidar_path = info['lidar_path'][16:]
         lidar_sd_token = self.nusc.get('sample', info['token'])['data']['LIDAR_TOP']
         lidarseg_labels_filename = os.path.join(self.nusc.dataroot,
-                                                self.nusc.get('lidarseg', lidar_sd_token)['filename'])
+                                                self.nusc.get('lidarseg', lidar_sd_token)['filename']) #根据lidar token 找到 filename
 
         points_label = np.fromfile(lidarseg_labels_filename, dtype=np.uint8).reshape([-1, 1])
         points_label = np.vectorize(self.learning_map.__getitem__)(points_label)

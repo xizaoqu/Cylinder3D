@@ -10,7 +10,8 @@ from dataloader.pc_dataset import get_pc_model_class
 def build(dataset_config,
           train_dataloader_config,
           val_dataloader_config,
-          grid_size=[480, 360, 32]):
+          grid_size=[480, 360, 32],
+          distributed=False,):
     data_path = train_dataloader_config["data_path"]
     train_imageset = train_dataloader_config["imageset"]
     val_imageset = val_dataloader_config["imageset"]
@@ -24,7 +25,8 @@ def build(dataset_config,
     nusc=None
     if "nusc" in dataset_config['pc_dataset_type']:
         from nuscenes import NuScenes
-        nusc = NuScenes(version='v1.0-trainval', dataroot=data_path, verbose=True)
+        #nusc = NuScenes(version='v1.0-trainval', dataroot=data_path, verbose=True)
+        nusc = NuScenes(version='v1.0-mini', dataroot=data_path, verbose=True) #debug
 
     print("start")
 
@@ -55,7 +57,10 @@ def build(dataset_config,
         ignore_label=dataset_config["ignore_label"],
     )
 
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    if distributed:
+        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    else:
+        train_sampler = None
     #val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
 
     # train_dataset_loader = torch.utils.data.DataLoader(dataset=train_dataset,

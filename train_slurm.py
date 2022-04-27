@@ -15,11 +15,11 @@ import subprocess
 
 from utils.metric_util import per_class_iu, fast_hist_crop
 from utils import common_utils
-from dataloader.pc_dataset import get_SemKITTI_label_name
+from dataloader.pc_dataset import get_SemKITTI_label_name, get_nuScenes_label_name
 from builder import data_builder, model_builder, loss_builder
 from config.config import load_config_data
 
-from utils.load_save_util import load_checkpoint
+from utils.load_save_util import load_checkpoint, load_checkpoint_1b1
 
 import warnings
 
@@ -28,14 +28,15 @@ warnings.filterwarnings("ignore")
 torch.cuda.empty_cache()
 
 
-def setup_distributed(backend="nccl", port=None):
+def setup_distributed(backend="nccl", port=None, launcher=None):
     """Initialize distributed training environment.
     support both slurm and torch.distributed.launch
     see torch.distributed.init_process_group() for more details
     """
     num_gpus = torch.cuda.device_count()
 
-    if "SLURM_JOB_ID" in os.environ:
+    if launcher is "slurm":
+    #if "SLURM_JOB_ID" in os.environ:
         print("is SLURM")
         rank = int(os.environ["SLURM_PROCID"])
         world_size = int(os.environ["SLURM_NTASKS"])
@@ -54,7 +55,7 @@ def setup_distributed(backend="nccl", port=None):
 
         print("WORLD_SIZE:"+str(world_size))
         print("RANK:"+str(rank % num_gpus))
-    else:
+    elif launcher is "pytorch":
         rank = int(os.environ["RANK"])
         world_size = int(os.environ["WORLD_SIZE"])
 
@@ -74,14 +75,20 @@ def setup_distributed(backend="nccl", port=None):
 
 def main(args):
     #pytorch_device = torch.device('cuda:0')
-    setup_distributed(backend="nccl")
+    if args.launcher is not None:
+        setup_distributed(backend="nccl", launcher=args.launcher)
+        local_rank = torch.distributed.get_rank()
+        torch.cuda.set_device(local_rank)
+        distributed = True
+    else:
+        local_rank = 0
+        distributed = False
     # torch.distributed.init_process_group(
     #     backend = 'nccl'
     #     #init_method='env://'
     # )
 
-    local_rank = torch.distributed.get_rank()
-    torch.cuda.set_device(local_rank)
+
 
 
     pytorch_device = torch.device(f'cuda:{local_rank}')
@@ -106,17 +113,24 @@ def main(args):
     model_load_path = train_hypers['model_load_path']
     model_save_path = train_hypers['model_save_path']
 
-    SemKITTI_label_name = get_SemKITTI_label_name(dataset_config["label_mapping"])
+    if args.dataset == "semantickitti":
+        SemKITTI_label_name = get_SemKITTI_label_name(dataset_config["label_mapping"])
+    elif args.dataset == "nuscenes":
+        SemKITTI_label_name = get_nuScenes_label_name(dataset_config["label_mapping"])
     unique_label = np.asarray(sorted(list(SemKITTI_label_name.keys())))[1:] - 1
     unique_label_str = [SemKITTI_label_name[x] for x in unique_label + 1]
 
     my_model = model_builder.build(model_config)
     if os.path.exists(model_load_path):
-        my_model = load_checkpoint(model_load_path, my_model)
+        if args.dataset == "semantickitti":
+            my_model = load_checkpoint(model_load_path, my_model)
+        elif args.dataset == "nuscenes":
+            my_model = load_checkpoint_1b1(model_load_path, my_model)
 
     my_model.to(pytorch_device)
     #my_model = torch.nn.DataParallel(my_model)
-    my_model = torch.nn.parallel.DistributedDataParallel(my_model, device_ids=[local_rank],output_device=local_rank)
+    if distributed:
+        my_model = torch.nn.parallel.DistributedDataParallel(my_model, device_ids=[local_rank],output_device=local_rank)
 
     optimizer = optim.Adam(my_model.parameters(), lr=train_hypers["learning_rate"])
 
@@ -126,9 +140,10 @@ def main(args):
     train_dataset_loader, val_dataset_loader = data_builder.build(dataset_config,
                                                                   train_dataloader_config,
                                                                   val_dataloader_config,
-                                                                  grid_size=grid_size)
+                                                                  grid_size=grid_size,
+                                                                  distributed=distributed)
 
-    output_dir = os.path.join('/mnt/lustre/xiaozeqi.vendor/output/'+args.outdir)
+    output_dir = os.path.join('output/'+args.outdir)
     ckpt_dir = os.path.join(output_dir, 'ckpt')
     tmp_dir = os.path.join(output_dir, 'tmp')
     summary_dir = os.path.join(output_dir, 'summary')
@@ -263,9 +278,11 @@ def main(args):
 if __name__ == '__main__':
     # Training settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-y', '--config_path', default='config/semantickitti.yaml')
+    parser.add_argument('-y', '--config_path', default='config/nuScenes.yaml')
+    parser.add_argument('-d', '--dataset', default='nuscenes')
     parser.add_argument('--local_rank', type=int, default=-1, help='node rank for distributed training')
     parser.add_argument('--outdir', default='Cylinder', help='node rank for distributed training')
+    parser.add_argument('-l', '--launcher', default=None)
 
     args = parser.parse_args()
 

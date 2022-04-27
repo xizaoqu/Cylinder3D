@@ -41,16 +41,18 @@ dataset_params:
 ###################
 ## Data_loader options
 train_data_loader:
-  data_path: "/data/dataset/nuScenes/"
-  imageset: "/data/dataset/nuScenes/nuscenes_infos_train.pkl"
+  data_path: "data/nuscenes/"
+  #imageset: "data/nuscenes/nuscenes_infos_train.pkl"
+  imageset: "data/nuscenes/nuscenes_infos_mini.pkl"
   return_ref: True
   batch_size: 2
   shuffle: True
   num_workers: 4
 
 val_data_loader:
-  data_path: "/data/dataset/nuScenes/"
-  imageset: "/data/dataset/nuScenes/nuscenes_infos_val.pkl"
+  data_path: "data/nuscenes/"
+  #imageset: "data/nuscenes/nuscenes_infos_val.pkl"
+  imageset: "data/nuscenes/nuscenes_infos_mini.pkl"
   return_ref: True
   batch_size: 1
   shuffle: False
@@ -60,7 +62,7 @@ val_data_loader:
 ###################
 ## Train params
 train_params:
-  model_load_path: "./model_load_dir_nuscenes/model_load.pt"
+  model_load_path: "./model_load_dir_nuscenes/model_load_nuscenes.pt"
   model_save_path: "./model_save_dir_nuscenes/model_save.pt"
   checkpoint_every_n_steps: 4599
   max_num_epochs: 40
