@@ -28,7 +28,6 @@ dataset_params:
   return_test: False
   fixed_volume_space: True
   label_mapping: "./config/label_mapping/semantic-kitti.yaml"
-  load_from_dir: False
   max_volume_space:
     - 50
     - 3.1415926
