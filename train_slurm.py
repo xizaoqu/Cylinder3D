@@ -176,7 +176,7 @@ def main(args):
         # lr_scheduler.step(epoch)
 
         if local_rank == 0:
-            if epoch >= 0:
+            if epoch %3 == 0:
                 pbar = tqdm(total=len(val_dataset_loader), dynamic_ncols=True)
                 my_model.eval()
                 hist_list = []
