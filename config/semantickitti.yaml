@@ -38,7 +38,6 @@ dataset_params:
     - -3.1415926
     - -4
 
-
 ###################
 ## Data_loader options
 train_data_loader:
