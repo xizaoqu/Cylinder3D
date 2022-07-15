@@ -65,9 +65,9 @@ class cylinder_fea(nn.Module):
         pt_num = cat_pt_ind.shape[0]
 
         # shuffle the data
-        shuffled_ind = torch.randperm(pt_num, device=cur_dev)
-        cat_pt_fea = cat_pt_fea[shuffled_ind, :]
-        cat_pt_ind = cat_pt_ind[shuffled_ind, :]
+        # shuffled_ind = torch.randperm(pt_num, device=cur_dev)
+        # cat_pt_fea = cat_pt_fea[shuffled_ind, :]
+        # cat_pt_ind = cat_pt_ind[shuffled_ind, :]
 
         # unique xy grid index
         unq, unq_inv, unq_cnt = torch.unique(cat_pt_ind, return_inverse=True, return_counts=True, dim=0)

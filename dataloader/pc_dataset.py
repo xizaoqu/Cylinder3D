@@ -7,7 +7,7 @@ import numpy as np
 from torch.utils import data
 import yaml
 import pickle
-#import mmcv 
+import mmcv 
 
 REGISTERED_PC_DATASET_CLASSES = {}
 
@@ -64,7 +64,7 @@ class SemKITTI_demo(data.Dataset):
 @register_dataset
 class SemKITTI_sk(data.Dataset):
     def __init__(self, data_path, imageset='train',
-                 return_ref=False, label_mapping="semantic-kitti.yaml", nusc=None):
+                 return_ref=False, label_mapping="semantic-kitti.yaml", nusc=None, load_from_dir=True):
         self.return_ref = return_ref
         with open(label_mapping, 'r') as stream:
             semkittiyaml = yaml.safe_load(stream)
@@ -80,7 +80,7 @@ class SemKITTI_sk(data.Dataset):
             raise Exception('Split must be train/val/test')
 
         self.im_idx = []
-        self.load_from_dir = True
+        self.load_from_dir = load_from_dir
         if self.load_from_dir is True:
             for i_folder in split:
                 self.im_idx += myabsoluteFilePaths('/'.join([data_path,str(i_folder).zfill(2),'velodyne']))
@@ -89,7 +89,7 @@ class SemKITTI_sk(data.Dataset):
                 for j in range(0,semkittiyaml['total_num'][i_folder]):
                     self.im_idx.append(os.path.join(data_path, str(i_folder).zfill(2), 'velodyne',str(j).zfill(6)+'.bin'))
         
-        self.file_client_args=dict(backend='petrel', path_mapping=dict({'data/':'s3://semikitti/'}))
+        self.file_client_args=dict(backend='petrel', path_mapping=dict({'data':'s3://openmmlab/datasets/detection3d'}))
         self.file_client = None
 
     def __len__(self):
@@ -100,8 +100,7 @@ class SemKITTI_sk(data.Dataset):
         # raw_data = np.fromfile(self.im_idx[index], dtype=np.float32).reshape((-1, 4))
         if self.load_from_dir is False:
             if self.file_client is None:
-                #self.file_client = mmcv.FileClient(**self.file_client_args)
-                raise NotImplementedError
+                self.file_client = mmcv.FileClient(**self.file_client_args)
             try:
                 mask_bytes = self.file_client.get(self.im_idx[index])
                 #add .copy() to fix read-only bug
