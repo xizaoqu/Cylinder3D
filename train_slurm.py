@@ -35,8 +35,7 @@ def setup_distributed(backend="nccl", port=None, launcher=None):
     """
     num_gpus = torch.cuda.device_count()
 
-    if launcher is "slurm":
-    #if "SLURM_JOB_ID" in os.environ:
+    if launcher == "slurm":
         print("is SLURM")
         rank = int(os.environ["SLURM_PROCID"])
         world_size = int(os.environ["SLURM_NTASKS"])
@@ -55,7 +54,7 @@ def setup_distributed(backend="nccl", port=None, launcher=None):
 
         print("WORLD_SIZE:"+str(world_size))
         print("RANK:"+str(rank % num_gpus))
-    elif launcher is "pytorch":
+    elif launcher == "pytorch":
         rank = int(os.environ["RANK"])
         world_size = int(os.environ["WORLD_SIZE"])
 
@@ -281,7 +280,7 @@ if __name__ == '__main__':
     parser.add_argument('-y', '--config_path', default='config/nuScenes.yaml')
     parser.add_argument('-d', '--dataset', default='nuscenes')
     parser.add_argument('--local_rank', type=int, default=-1, help='node rank for distributed training')
-    parser.add_argument('--outdir', default='Cylinder', help='node rank for distributed training')
+    parser.add_argument('--outdir', default='Cylinder')
     parser.add_argument('-l', '--launcher', default=None)
 
     args = parser.parse_args()
